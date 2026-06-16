@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Casita de Tom - Útiles Escolares</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <style>
+    body {
+      background-color: #121214 !important;
+      color: #ffffff !important;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    /* Estilos para las tarjetas de productos estilo modo oscuro */
+    .card-product {
+      background-color: #1a1a1e !important;
+      border: 1px solid #2d2d34 !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-product:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2) !important;
+    }
+    .img-container {
+      width: 100%;
+      height: 200px;
+      background-color: #121214;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-title {
+      color: #ffffff !important;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .product-price {
+      color: #198754 !important;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0;
+    }
+    .btn-add-cart {
+      background-color: #198754 !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      border: none !important;
+      border-radius: 8px !important;
+      transition: background-color 0.2s;
+    }
+    .btn-add-cart:hover {
+      background-color: #146c43 !important;
+    }
+    /* Ajuste para el menú lateral pegajoso */
+    .sticky-sidebar {
+      position: sticky;
+      top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary py-3">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-success fs-3" href="{{ url_for('index') }}">
+      <i class="fa-solid fa-store me-2"></i>La Casita de Tom
+    </a>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <form action="{{ url_for('index') }}" method="GET" class="d-flex mx-auto" style="max-width: 400px; width: 100%;">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control bg-dark text-white border-secondary" placeholder="Buscar útil..." value="{{ query or '' }}">
+          <button class="btn btn-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+      </form>
+
+      <div class="d-flex align-items-center gap-3">
+        {% if session.get('usuario') %}
+          <span class="text-white me-2 fw-bold">Hola, <span class="text-success">{{ session['usuario'] }}</span></span>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-success btn-sm fw-bold px-3">Iniciar Sesión</a>
+        {% endif %}
+        
+        <a href="{{ url_for('ver_carrito') }}" class="btn btn-outline-light btn-sm position-relative">
+          <i class="fa-solid fa-shopping-cart"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+  <div class="container mt-4">
+    <div id="carouselOfertas" class="carousel slide border border-secondary rounded shadow" data-bs-ride="carousel" style="border-radius: 15px; overflow: hidden;">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselOfertas" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#carouselOfertas" data-bs-slide-to="1"></button>
+      </div>
+      <div class="carousel-inner">
+        <div class="carousel-item active" style="height: 320px; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://marchante.mx/cdn/shop/files/Pack3cuadernosengargolados_1686c825-3df8-408c-9ec1-cb02d4935dbf.png?v=1771953541') center/cover;">
+          <div class="carousel-caption text-start h-100 d-flex flex-column justify-content-center pb-5">
+            <span class="badge bg-success mb-2 align-self-start fw-bold px-3 py-2 text-uppercase" style="font-size: 11px;">Oferta Escolar</span>
+            <h1 class="fw-bold text-white display-5 mb-2">Pack x3 Cuadernos de Calidad</h1>
+            <p class="text-light fs-5">Llévatelo hoy a solo S/ 12.00 para todo el año escolar.</p>
+          </div>
+        </div>
+        <div class="carousel-item" style="height: 320px; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://www.educaciontrespuntocero.com/wp-content/uploads/2022/05/mochilas-ergonomicas-768x512.jpg.webp') center/cover;">
+          <div class="carousel-caption text-start h-100 d-flex flex-column justify-content-center pb-5">
+            <span class="badge bg-info text-dark mb-2 align-self-start fw-bold px-3 py-2 text-uppercase" style="font-size: 11px;">Nueva Colección</span>
+            <h1 class="fw-bold text-white display-5 mb-2">Mochilas Ergonómicas</h1>
+            <p class="text-light fs-5">Modelos acolchados con alta resistencia desde S/ 45.00.</p>
+          </div>
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselOfertas" data-bs-slide-to="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselOfertas" data-bs-slide-to="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="container mt-5 mb-5">
+    <div class="row">
+      
+      <div class="col-lg-3 mb-4">
+        <div class="card bg-dark border-secondary p-3 text-white sticky-sidebar" style="border-radius: 12px;">
+          <h5 class="fw-bold text-success mb-3">
+            <i class="fa-solid fa-bars-staggered me-2"></i>Categorías
+          </h5>
+          
+          <div class="d-grid gap-2">
+            <button class="btn btn-success text-start fw-bold active btn-filtro" onclick="filtrarCategoria('todos')">
+              <i class="fa-solid fa-border-all me-2"></i> Todo el Catálogo
+            </button>
+            <button class="btn btn-outline-light text-start border-0 btn-filtro" onclick="filtrarCategoria('cuadernos')">
+              <i class="fa-solid fa-book-open me-2"></i> Cuadernos y Packs
+            </button>
+            <button class="btn btn-outline-light text-start border-0 btn-filtro" onclick="filtrarCategoria('mochilas')">
+              <i class="fa-solid fa-backpack me-2"></i> Mochilas Escolares
+            </button>
+            <button class="btn btn-outline-light text-start border-0 btn-filtro" onclick="filtrarCategoria('utiles')">
+              <i class="fa-solid fa-scissors me-2"></i> Útiles y Tijeras
+            </button>
+            <button class="btn btn-outline-light text-start border-0 btn-filtro" onclick="filtrarCategoria('gomas')">
+              <i class="fa-solid fa-prescription-bottle me-2"></i> Gomas y Pegamentos
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-9">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-white fw-bold mb-0" id="titulo-catalogo">
+            {% if busqueda_activa %}
+              Resultados para: "<span class="text-success">{{ query }}</span>"
+            {% else %}
+              Todo el Catálogo Destacado
+            {% endif %}
+          </h3>
+          {% if busqueda_activa %}
+            <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary text-white px-3" style="border-radius: 8px;"><i class="fa-solid fa-rotate-left me-1"></i> Ver todos</a>
+          {% endif %}
+        </div>
+
+        {% if productos %}
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+            {% for producto in productos %}
+              <div class="col tarjeta-producto" data-categoria="{{ producto.categoria | lower }}">
+                <div class="card card-product shadow-sm h-100">
+                  <div class="img-container">
+                    {% if producto.imagen %}
+                      <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}">
+                    {% else %}
+                      <img src="https://via.placeholder.com/300x200/1a1a1e/ffffff?text=Util+Escolar" alt="Imagen no disponible">
+                    {% endif %}
+                  </div>
+                  <div class="card-body d-flex flex-column justify-content-between p-3">
+                    <div>
+                      <h5 class="product-title mb-1">{{ producto.nombre }}</h5>
+                      <span class="badge bg-dark border border-secondary text-secondary font-monospace mb-3" style="font-size: 10px; padding: 4px 8px;">{{ producto.categoria | upper }}</span>
+                    </div>
+                    <div>
+                      <p class="product-price mb-3">S/ {{ "%.2f"|format(producto.precio) }}</p>
+                      <a href="{{ url_for('agregar_carrito', producto_id=producto.id) }}" class="btn btn-add-cart w-100 py-2 btn-sm text-center">
+                        <i class="fa-solid fa-plus me-1"></i> Llevar al carrito
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5">
+            <i class="fa-solid fa-box-open text-muted display-1 mb-3"></i>
+            <h4 class="text-muted">No encontramos útiles escolares con ese nombre.</h4>
+            <p class="text-secondary">Prueba buscando "cuaderno", "mochila" o "utiles".</p>
+          </div>
+        {% endif %}
+        
+        <div id="mensaje-vacio" class="text-center text-muted py-5 d-none">
+          <i class="fa-solid fa-folder-open display-2 mb-3 text-secondary"></i>
+          <h4 class="text-muted">No hay productos disponibles en esta categoría</h4>
+          <p class="text-secondary">Prueba seleccionando otra sección en el panel izquierdo.</p>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function filtrarCategoria(categoria) {
+    const titulo = document.getElementById('titulo-catalogo');
+    const tarjetas = document.querySelectorAll('.tarjeta-producto');
+    let visibles = 0;
+
+    // Mapeo de nombres para que sea más flexible
+    const titulosMap = {
+      'todos': 'Todo el Catálogo',
+      'cuadernos': 'Sección: Cuadernos',
+      'mochilas': 'Sección: Mochilas',
+      'utiles': 'Sección: Útiles y Tijeras',
+      'gomas': 'Sección: Gomas y Pegamentos'
+    };
+    
+    titulo.innerText = titulosMap[categoria] || "Catálogo";
+
+    tarjetas.forEach(tarjeta => {
+      const catData = tarjeta.getAttribute('data-categoria').toLowerCase();
+      const nombreProd = tarjeta.querySelector('.product-title').innerText.toLowerCase();
+      
+      // LOGICA COOL: Si la categoría coincide O el nombre contiene la palabra clave
+      // Ej: Si el botón es 'gomas', busca si el nombre tiene 'goma'
+      let coincide = false;
+      if (categoria === 'todos') {
+        coincide = true;
+      } else {
+        // Quitamos la 's' final para buscar (ej: 'gomas' -> 'goma')
+        const palabraClave = categoria.endsWith('s') ? categoria.slice(0, -1) : categoria;
+        if (catData.includes(palabraClave) || nombreProd.includes(palabraClave)) {
+          coincide = true;
+        }
+      }
+
+      if (coincide) {
+        tarjeta.style.display = 'block';
+        visibles++;
+      } else {
+        tarjeta.style.display = 'none';
+      }
+    });
+
+    // Mensaje de vacío
+    document.getElementById('mensaje-vacio').classList.toggle('d-none', visibles > 0);
+  }
+</script>
+</body>
+</html>

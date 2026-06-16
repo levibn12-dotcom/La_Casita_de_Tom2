@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Administrativo - La Casita de Tom</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <style>
+    body { 
+      background-color: #121214 !important; 
+      color: #ffffff !important; 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+    }
+    .text-muted-clear {
+      color: #a0aec0 !important;
+    }
+    .card-kpi { 
+      border: 1px solid #2d2d34; 
+      background: #1a1a1e; 
+      border-radius: 12px; 
+      padding: 1.5rem;
+    }
+    .card-custom {
+      background-color: #1a1a1e !important;
+      border: 1px solid #2d2d34 !important;
+      border-radius: 12px !important;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .table-container { 
+      max-height: 450px; 
+      overflow-y: auto; 
+    }
+    /* Forzar que los textos de los formularios y tablas sean siempre visibles */
+    label, h5, th, h6 {
+      color: #ffffff !important;
+    }
+    .form-control::placeholder {
+      color: #cbd5e1 !important;
+      opacity: 0.7;
+    }
+    .form-control {
+      background-color: #2d2d34 !important;
+      color: #ffffff !important;
+      border: 1px solid #4a4a58 !important;
+    }
+    .form-control:focus {
+      background-color: #373742 !important;
+      color: #ffffff !important;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary py-3">
+    <div class="container">
+      <span class="navbar-brand fw-bold text-success fs-4">
+        <i class="fa-solid fa-chart-line me-2"></i>La Casita de Tom 
+        <span class="text-muted fs-6 fw-normal font-monospace"> | Panel de Control 2026</span>
+      </span>
+      <div class="d-flex gap-3">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm px-3"><i class="fa-solid fa-eye me-1"></i> Ver Tienda</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm px-3"><i class="fa-solid fa-power-off me-1"></i> Salir</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4 mb-5">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show text-dark fw-bold mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card-kpi d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-muted-clear text-uppercase small mb-1 fw-bold">Items en Catálogo</h6>
+            <h2 class="fw-bold text-success mb-0" style="font-size: 2.2rem;">{{ total_productos }}</h2>
+          </div>
+          <div class="fs-1 text-success opacity-50"><i class="fa-solid fa-boxes-stacked"></i></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-kpi d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-muted-clear text-uppercase small mb-1 fw-bold">Servicios Ofrecidos</h6>
+            <h2 class="fw-bold text-info mb-0" style="font-size: 2.2rem;">{{ total_servicios }}</h2>
+          </div>
+          <div class="fs-1 text-info opacity-50"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-kpi d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-muted-clear text-uppercase small mb-1 fw-bold">Usuarios en Base de Datos</h6>
+            <h2 class="fw-bold text-warning mb-0" style="font-size: 2.2rem;">{{ total_usuarios }}</h2>
+          </div>
+          <div class="fs-1 text-warning opacity-50"><i class="fa-solid fa-users"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      
+      <div class="col-lg-4 mb-4">
+        
+        <div class="card-custom">
+          <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-plus me-2"></i>Añadir Producto</h5>
+          <form action="{{ url_for('crear_producto') }}" method="POST">
+            <div class="mb-2">
+              <input type="text" class="form-control form-control-sm" name="nombre" placeholder="Nombre del útil escolar" required>
+            </div>
+            <div class="mb-2">
+              <input type="number" step="0.01" class="form-control form-control-sm" name="precio" placeholder="Precio Venta (S/.)" required>
+            </div>
+            <div class="mb-2">
+              <input type="text" class="form-control form-control-sm" name="imagen" placeholder="URL Imagen (Opcional)">
+            </div>
+            <div class="mb-3">
+              <input type="text" class="form-control form-control-sm" name="categoria" placeholder="Categoría (cuadernos, mochilas, utiles)" required>
+            </div>
+            <div class="form-check mb-3">
+              <input type="checkbox" class="form-check-input" name="destacado" id="dest" checked>
+              <label class="form-check-label text-muted-clear small" for="dest">Mostrar en vitrina principal</label>
+            </div>
+            <button class="btn btn-success w-100 btn-sm fw-bold py-2" type="submit"><i class="fa-solid fa-save me-1"></i> Registrar Producto</button>
+          </form>
+        </div>
+
+        <div class="card-custom">
+          <h5 class="fw-bold text-info mb-3"><i class="fa-solid fa-circle-plus me-2"></i>Añadir Servicio</h5>
+          <form action="{{ url_for('crear_servicio') }}" method="POST">
+            <div class="mb-2">
+              <input type="text" class="form-control form-control-sm" name="nombre" placeholder="Nombre del servicio" required>
+            </div>
+            <div class="mb-2">
+              <input type="number" step="0.01" class="form-control form-control-sm" name="precio" placeholder="Costo Unitario (S/.)" required>
+            </div>
+            <div class="mb-3">
+              <textarea class="form-control form-control-sm" name="descripcion" placeholder="Descripción del servicio..." rows="2" required></textarea>
+            </div>
+            <button class="btn btn-info w-100 btn-sm text-dark fw-bold py-2" type="submit"><i class="fa-solid fa-save me-1"></i> Registrar Servicio</button>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="col-lg-8">
+        
+        <div class="card-custom">
+          <h5 class="text-white fw-bold mb-3"><i class="fa-solid fa-pen-to-square text-success me-2"></i>Gestión de Precios e Inventario</h5>
+          <div class="table-container border border-secondary rounded">
+            <table class="table table-dark table-hover align-middle mb-0 small">
+              <thead>
+                <tr class="table-active border-bottom border-secondary">
+                  <th class="text-white fw-bold p-3">Descripción del Artículo</th>
+                  <th class="text-white fw-bold p-3" style="width: 160px;">Precio Unitario</th>
+                  <th class="text-center text-white fw-bold p-3" style="width: 80px;">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prod in productos %}
+                  <tr class="border-bottom border-secondary">
+                    <td class="p-3">
+                      <span class="text-white fw-bold d-block mb-1" style="font-size: 0.95rem;">{{ prod.nombre }}</span>
+                      <span class="badge bg-dark border border-secondary text-light font-monospace" style="font-size: 10px; padding: 3px 8px;">{{ prod.categoria | upper }}</span>
+                    </td>
+                    <td class="p-3">
+                      <form action="{{ url_for('editar_precio_producto', id=prod.id) }}" method="POST" class="d-flex align-items-center">
+                        <span class="text-white me-1 fw-bold">S/.</span>
+                        <input type="number" step="0.01" name="nuevo_precio" value="{{ prod.precio }}" class="form-control form-control-sm text-center text-success fw-bold p-1" style="width: 75px;" required>
+                        <button type="submit" class="btn btn-sm btn-success ms-2 p-1 px-2" title="Guardar cambios"><i class="fa-solid fa-floppy-disk"></i></button>
+                      </form>
+                    </td>
+                    <td class="text-center p-3">
+                      <a href="{{ url_for('eliminar_producto', id=prod.id) }}" class="text-danger fs-5" onclick="return confirm('¿Eliminar {{ prod.nombre }} del catálogo?')">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-custom">
+          <h5 class="fw-bold text-warning mb-3"><i class="fa-solid fa-users-gear me-2"></i>Clientes Registrados (`usuarios.txt`)</h5>
+          <div class="table-responsive border border-secondary rounded">
+            <table class="table table-dark table-striped table-hover align-middle mb-0 small">
+              <thead>
+                <tr class="table-active">
+                  <th class="text-white p-3">Usuario</th>
+                  <th class="text-white p-3">Contraseña Almacenada</th>
+                  <th class="text-center text-white p-3" style="width: 120px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in usuarios %}
+                  <tr class="border-bottom border-secondary">
+                    <td class="p-3 fw-bold text-light">{{ user.usuario }}</td>
+                    <td class="p-3"><code class="text-warning fs-6">{{ user.contrasena }}</code></td>
+                    <td class="text-center p-3">
+                      <a href="{{ url_for('eliminar_cliente', username=user.usuario) }}" class="btn btn-sm btn-outline-danger px-2 py-1" onclick="return confirm('¿Dar de baja al usuario {{ user.usuario }}?')">
+                        <i class="fa-solid fa-user-minus me-1"></i> Eliminar
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
